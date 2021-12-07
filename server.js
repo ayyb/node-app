@@ -53,11 +53,21 @@ app.post("/add", function (req, res) {
         function (error, client) {
           if (error) return console.log(error);
           db = client.db('todoapp'); //Mongo db 접속 방법
-      
+          db.collection('counter').findOne({name : '게시물갯수'},function(e,res){
+              var totalPostCount = res.totalPost
+              db.collection('post').insertOne( {_id : totalPostCount, title : req.body.title, date : req.body.date} , function(error, result){
+                db.collection('counter').updateOne({name : '게시물갯수'},{$inc:{totalPost :1}},function(e,res){ //$inc operate
+                  if(e){
+                    return console.log(e)
+                  }
+                })
+                console.log('폼데이터 저장완료'); 
+              });
+
+          })
+          
           //db insert 방법 db.collection('콜렉션명').insertOn({obj},callback(e,res){function})
-          db.collection('post').insertOne( req.body , function(error, result){
-              console.log('폼데이터 저장완료'); 
-          });
+          
         }
       );
   
