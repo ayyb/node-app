@@ -38,6 +38,20 @@ app.get("/beauty", function (req, res) {
   res.send("뷰티용품 사세요");
 });
 app.post("/add", function (req, res) {
-  console.log("add Page", req.body);
+    console.log("add Page", req.body);
+    MongoClient.connect(
+        `mongodb+srv://admin:${pass}@cluster0.fjbod.mongodb.net/todoapp?retryWrites=true&w=majority`,
+        { useUnifiedTopology: true },
+        function (error, client) {
+          if (error) return console.log(error);
+          db = client.db('todoapp'); //Mongo db 접속 방법
+      
+          //db insert 방법 db.collection('콜렉션명').insertOn({obj},callback(e,res){function})
+          db.collection('post').insertOne( req.body , function(error, result){
+              console.log('폼데이터 저장완료'); 
+          });
+        }
+      );
+  
   res.send("응답되었습니다.");
 });
