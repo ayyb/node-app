@@ -9,24 +9,22 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
+    <link href="/public/index.css" rel="stylesheet">
     <title>Hello, world!</title>
 </head>
 
 <body>
     <%- include('nav.html')%>
-    <h1>Hello, world!</h1>
-    <ul class="list-group">
-        <% for (var i=0; i < posts.length; i++){ %>
-            <li class="list-group-item">
-                <h4> 할일 제목 : <%= posts[i].title %>
-                </h4>
-                <p> 할일 마감날짜 : <%= posts[i].date %>
-                </p>
-                <button class="delete" data-id="<%= posts[i]._id %>">삭제</button>
-            </li>
-            <% } %>
-    </ul>
+    <div class="container mt-3">
+        <div class="card" style="width: 100%">
+          <div class="card-body">
+            <h5 class="card-title"><%= data.title %></h5>
+            <h6 class="card-subtitle mb-2 text-muted"><%= data.date %></h6>
+            <p class="card-text">임시내용입니다.</p>
+            <a href="#" class="card-link">수정하기</a>
+          </div>
+        </div>
+      </div>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -37,18 +35,6 @@
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
     <script>
-        $('.delete').click(function(e){
-            $.ajax({
-                method: 'DELETE',
-                url: '/delete',
-                data: { _id : e.target.dataset.id }
-            }).done((res) => {
-                console.log('삭제~~')
-                $(this).parent('li').fadeOut();
-            }).fail((e) => {
-                console.log('삭제실패')
-            })
-        });
     </script>
 </body>
 
