@@ -73,3 +73,10 @@ app.post("/add", function (req, res) {
   
   res.send("응답되었습니다.");
 });
+app.delete("/delete",function(req,res){
+  req.body._id = parseInt(req.body._id)//문자열을 숫자로
+  db.collection('post').deleteOne(req.body, function(e,res){
+    console.log('삭제완료')
+  })
+  res.send('삭제되었습니다.')
+})
