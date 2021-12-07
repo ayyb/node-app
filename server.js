@@ -5,6 +5,8 @@ const app = express();
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({ extended: true })); //위치 잘 정리할것.
+app.use('/public',express.static('public'))
+
 var pass = "qwer1234";
 var db
 MongoClient.connect(
@@ -79,4 +81,10 @@ app.delete("/delete",function(req,res){
     console.log('삭제완료')
   })
   res.send('삭제되었습니다.')
+})
+
+app.get("/detail/:id",function(req,res){
+  db.collection('post').findOne({ _id : parseInt(req.params.id) }, function(e, result){
+    res.render("detail.ejs",{data:result})
+  })
 })
