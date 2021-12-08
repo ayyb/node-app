@@ -19,6 +19,7 @@
     <ul class="list-group">
         <% for (var i=0; i < posts.length; i++){ %>
             <li class="list-group-item">
+                <h5>글번호 :  <%= posts[i]._id %></h5>
                 <h4> 할일 제목 : <%= posts[i].title %>
                 </h4>
                 <p> 할일 마감날짜 : <%= posts[i].date %>

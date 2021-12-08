@@ -92,7 +92,16 @@ app.get("/detail/:id",function(req,res){
 })
 
 app.get("/edit/:id",function(req,res){
-  db.collection('post').findOne({_id : parseInt(req.params.id)},function(e, result){
-    res.render('edit.ejs',{post:result})
+  db.collection('post').findOne({ _id : parseInt(req.params.id)},function(e, result){
+    // console.log(result)
+    res.render("edit.ejs",{post:result})
+  })
+})
+
+app.put('/edit',function(req,res){
+  console.log(req.body.id);
+  db.collection('post').updateOne({ _id: parseInt(req.body.id)},{$set:{title: req.body.title, date:req.body.date}},function(){
+    console.log('수정완료')
+    res.redirect('/list')
   })
 })
