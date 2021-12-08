@@ -59,14 +59,15 @@ app.get("/list", function (req, res) {
 app.post("/add", function (req, res) {
     console.log("add Page", req.body);
     MongoClient.connect(
-        `mongodb+srv://admin:${pass}@cluster0.fjbod.mongodb.net/todoapp?retryWrites=true&w=majority`,
+        process.env.DB_URL,
         { useUnifiedTopology: true },
         function (error, client) {
           if (error) return console.log(error);
           db = client.db('todoapp'); //Mongo db 접속 방법
           db.collection('counter').findOne({name : '게시물갯수'},function(e,res){
               var totalPostCount = res.totalPost
-              db.collection('post').insertOne( {_id : totalPostCount, title : req.body.title, date : req.body.date} , function(error, result){
+              var post = {_id : totalPostCount+1, writer: req.user._id, title : req.body.title, date : req.body.date}
+              db.collection('post').insertOne(  post, function(error, result){
                 db.collection('counter').updateOne({name : '게시물갯수'},{$inc:{totalPost :1}},function(e,res){ //$inc operate
                   if(e){
                     return console.log(e)
@@ -86,7 +87,7 @@ app.post("/add", function (req, res) {
 });
 app.delete("/delete",function(req,res){
   req.body._id = parseInt(req.body._id)//문자열을 숫자로
-  db.collection('post').deleteOne(req.body, function(e,res){
+  db.collection('post').deleteOne({_id : req.body._id, 작성자 : req.user._id }, function(e,res){
     console.log('삭제완료')
   })
   res.send('삭제되었습니다.')
@@ -163,3 +164,31 @@ function checkLogin(req,res,next){
     res.send('로그인하지 않았습니다.')
   }
 }
+
+app.get('/search',(req,res)=>{
+  var srchWord =   [{
+    $search: {
+      index: 'titleSearh',
+      text: {
+        query: req.query.value,
+        path: 'title'  // 제목날짜 둘다 찾고 싶으면 ['제목', '날짜']
+      }
+    }
+  }
+] 
+
+  console.log(req.query)
+  db.collection('post').aggregate(srchWord).toArray((e,result)=>{
+    console.log('검색단어',srchWord);
+    console.log('검색결과',result);
+    res.render('search.ejs',{ posts:result })
+  })
+})
+
+app.post('/register',function(req,res){
+  console.log(req.body)
+  db.collection('login').insertOne({id:req.body.id,pw:req.body.pw},function(e,result){
+    console.log(result)
+    res.send('가입되었습니다.')
+  })
+})
