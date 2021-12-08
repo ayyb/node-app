@@ -6,6 +6,7 @@ const methodOverride = require('method-override')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
+require('dotenv').config()
 
 //미들웨어 사용부분
 app.use(session({secret : '비밀코드', resave : true, saveUninitialized: false}));
@@ -16,10 +17,9 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true })); //위치 잘 정리할것.
 app.use('/public',express.static('public'))
 
-var pass = "qwer1234";
 var db
 MongoClient.connect(
-  `mongodb+srv://admin:${pass}@cluster0.fjbod.mongodb.net/todoapp?retryWrites=true&w=majority`,
+  process.env.DB_URL,
   { useUnifiedTopology: true },
   function (error, client) {
     if (error) return console.log(error);
@@ -31,7 +31,7 @@ MongoClient.connect(
 	// });
 
     //서버띄우는 코드 여기로 옮기기
-    app.listen("8080", function () {
+    app.listen(process.env.PORT, function () {
       console.log("listening on 8080");
     });
   }
