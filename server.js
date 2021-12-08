@@ -16,6 +16,8 @@ app.use(methodOverride('_method'))
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true })); //위치 잘 정리할것.
 app.use('/public',express.static('public'))
+app.use('/shop', require('./routes/shop.js') );
+app.use('/board/sub', require('./routes/board.js') );
 
 var db
 MongoClient.connect(
@@ -192,3 +194,11 @@ app.post('/register',function(req,res){
     res.send('가입되었습니다.')
   })
 })
+
+app.get('/shop/shirts', function(req, res){
+  res.send('셔츠 파는 페이지입니다.');
+});
+
+app.get('/shop/pants', function(req, res){
+  res.send('바지 파는 페이지입니다.');
+}); 
