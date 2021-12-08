@@ -3,7 +3,14 @@ const bodyParser = require("body-parser"); //express 기본 설치
 const MongoClient = require("mongodb").MongoClient;
 const app = express();
 const methodOverride = require('method-override')
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
 
+//미들웨어 사용부분
+app.use(session({secret : '비밀코드', resave : true, saveUninitialized: false}));
+app.use(passport.initialize());
+app.use(passport.session()); 
 app.use(methodOverride('_method'))
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true })); //위치 잘 정리할것.
@@ -105,3 +112,54 @@ app.put('/edit',function(req,res){
     res.redirect('/list')
   })
 })
+
+app.get('/login',function(req,res){
+  res.render('login.ejs')
+})
+
+app.post('/login',passport.authenticate('local',{failureRedirect:'/fail'}),function(req,res){ //passport를 사용해서 id, pw 확인
+  res.redirect('/')
+})
+
+passport.use(new LocalStrategy({
+  usernameField: 'id', //userName 필드
+  passwordField: 'pw', //password 필드
+  session: true, //세션 생성 여부
+  passReqToCallback: false, //추가적인 검사가 필요한지
+}, function (입력한아이디, 입력한비번, done) {
+  //console.log(입력한아이디, 입력한비번);
+  db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
+    if (에러) return done(에러)
+
+    if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+    if (입력한비번 == 결과.pw) {
+      return done(null, 결과)
+    } else {
+      return done(null, false, { message: '비번틀렸어요' })
+    }
+  })
+}));
+
+passport.serializeUser(function (user, done) {
+  done(null, user.id)
+});
+
+passport.deserializeUser(function (아이디, done) {
+  db.collection('login').findOne({ id: 아이디 }, function (e, result) {
+    console.log(result)
+    done(null, result)
+  })
+}); 
+
+app.get('/mypage',checkLogin,function(req,res){
+  //console.log(req.user);
+  res.render('mypage.ejs',{ user:req.user })
+})
+
+function checkLogin(req,res,next){
+  if(req.user){
+    next()
+  }else{
+    res.send('로그인하지 않았습니다.')
+  }
+}
