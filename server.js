@@ -2,8 +2,10 @@ const express = require("express");
 const bodyParser = require("body-parser"); //express 기본 설치
 const MongoClient = require("mongodb").MongoClient;
 const app = express();
-app.set('view engine', 'ejs');
+const methodOverride = require('method-override')
 
+app.use(methodOverride('_method'))
+app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true })); //위치 잘 정리할것.
 app.use('/public',express.static('public'))
 
@@ -86,5 +88,11 @@ app.delete("/delete",function(req,res){
 app.get("/detail/:id",function(req,res){
   db.collection('post').findOne({ _id : parseInt(req.params.id) }, function(e, result){
     res.render("detail.ejs",{data:result})
+  })
+})
+
+app.get("/edit/:id",function(req,res){
+  db.collection('post').findOne({_id : parseInt(req.params.id)},function(e, result){
+    res.render('edit.ejs',{post:result})
   })
 })
