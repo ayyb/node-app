@@ -6,6 +6,7 @@ const methodOverride = require("method-override");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
+const objectId = require("mongodb")
 var path = require('path');
 require("dotenv").config();
 
@@ -280,3 +281,62 @@ app.post("/upload",upload.single('profileImg'),function(req,res){
 app.get('/image/:imageName', function(req, res){
   res.sendFile( __dirname + '/public/image/' + req.params.imageName )
 })
+
+app.post('/chatroom', function(req,res){
+  console.log('챗데이터')
+  var dataSet = {
+    title:'blabla',
+    member:[objectId(req.body.chatedId), req.user._id],
+    data : new Date()
+  }
+  
+  db.collection('chatroom').insertOne(dataSet).then(function(result){
+    res.send('저장완료')
+  });
+})
+
+app.get('/chat',function(req,res){
+  db.collection('chatroom').find({ member : req.user._id }).toArray().then((result)=>{
+    console.log(result);
+    res.render('chat.ejs', {data : result})
+  })
+})
+
+app.post('/message',function(req,res){
+  var dataSet = {
+    parent : req.body.parent,
+    userid : req.user._id,
+    content : req.body.content,
+    date : new Date(),
+  }
+  db.collection('message').insertOne(dataSet)
+  .then((result)=>{
+    res.send(result);
+  })
+})
+
+app.get('/message/:parentid', function(req, res){
+
+  res.writeHead(200, {
+    "Connection": "keep-alive",
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+  });
+  db.collection('message').find({ parent: req.params.parentid }).toArray()
+  .then((result)=>{
+    console.log(result);
+    res.write('event: test\n');
+    res.write(`data: ${JSON.stringify(결과)}\n\n`);
+  });
+
+  const searchDoc = [
+    { $match: { 'fullDocument.parent': req.params.parentid } }
+  ];
+
+  const changeStream = db.collection('message').watch(searchDoc);
+  changeStream.on('change', result => {
+    console.log(result.fullDocument);
+    var addDoc = [result.fullDocument];
+    res.write(`data: ${JSON.stringify(addDoc)}\n\n`);
+  });
+});
