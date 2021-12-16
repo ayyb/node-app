@@ -6,7 +6,10 @@ const methodOverride = require("method-override");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const session = require("express-session");
-const objectId = require("mongodb")
+const objectid = require("mongodb")
+const http = require('http').createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http);
 var path = require('path');
 require("dotenv").config();
 
@@ -61,7 +64,7 @@ MongoClient.connect(
     // });
 
     //서버띄우는 코드 여기로 옮기기
-    app.listen(process.env.PORT, function () {
+    http.listen(process.env.PORT, function () {
       console.log("listening on 8080");
     });
   }
@@ -286,7 +289,7 @@ app.post('/chatroom', function(req,res){
   console.log('챗데이터')
   var dataSet = {
     title:'blabla',
-    member:[objectId(req.body.chatedId), req.user._id],
+    member:[objectid(req.body.chatedId), req.user._id],
     data : new Date()
   }
   
@@ -339,4 +342,23 @@ app.get('/message/:parentid', function(req, res){
     var addDoc = [result.fullDocument];
     res.write(`data: ${JSON.stringify(addDoc)}\n\n`);
   });
+});
+app.get('/socket',function(req,res){
+  res.render('socket.ejs')
+})
+
+io.on('connection', function(socket){
+  console.log('연결되었어요');
+  
+  socket.on('user-send', function (data) {
+    io.emit('broadcast', data)  //모든사람에게 데이터 전송
+  });
+  socket.on('joinroom', function(data){
+    socket.join("room1");
+  });
+
+  socket.on('room1-send', function(data){
+    io.to("room1").emit('broadcast', data);
+  });
+  
 });

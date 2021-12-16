@@ -79,10 +79,12 @@
                     </div>
                 </div>
             </div>
-
+            <button id="sends">서버로 데이터 보내기</button>
         </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
         <script>
+            var socket = io();
             $('#send').click(function () {
                 var contents = $('#chat-input').val();   //1, 2
                 var sendData = {
@@ -113,6 +115,13 @@
                         $('.chat-content').append(`<li><span class="chat-box">${a.content}</span></li>`)
                     });
                 });
+            });
+            $('#send').click(function () {
+                socket.emit('user-send', '안녕하쇼')
+            });
+
+            socket.on('broadcast', function (data) {
+                $('#content').append('<div>' + data + '</div>')
             });
 
         </script>
